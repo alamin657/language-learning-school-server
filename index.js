@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3ovac2y.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -27,18 +27,24 @@ async function run() {
         await client.connect();
 
         const classesCollection = client.db('learninDB').collection('classes');
-        const studentCollection = client.db('learnDB').collection('student');
+        const studentCollection = client.db('learninDB').collection('student');
 
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result)
         })
 
-        app.post('/students', async (req, res) => {
+        app.put('/student/:id', async (req, res) => {
             const student = req.body;
-            const result = await studentCollection.insertOne(student);
-            res.send(result)
+            console.log(student)
 
+            const filter = { _id: new ObjectId(req.params.id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: student,
+            }
+            const result = await studentCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
         })
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
