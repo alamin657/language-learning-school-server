@@ -24,9 +24,10 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        // await client.connect();
+        await client.connect();
 
-        const classesCollection = client.db('learninDB').collection('classes')
+        const classesCollection = client.db('learninDB').collection('classes');
+        const studentCollection = client.db('learnDB').collection('student');
 
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
