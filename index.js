@@ -27,15 +27,23 @@ async function run() {
         await client.connect();
 
         const classesCollection = client.db('learninDB').collection('classes');
-        const studentCollection = client.db('learninDB').collection('student');
+        const studentsCollection = client.db('learninDB').collection('students');
 
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result)
         })
 
-        app.put('/student/:id', async (req, res) => {
-            const student = req.body;
+        app.get('/students/:email', async (req, res) => {
+            const email = req.params.email
+            console.log(email)
+            const query = { email: email }
+            const result = await studentsCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.put('/students/:id', async (req, res) => {
+            const student = req.body
             console.log(student)
 
             const filter = { _id: new ObjectId(req.params.id) }
@@ -43,7 +51,7 @@ async function run() {
             const updateDoc = {
                 $set: student,
             }
-            const result = await studentCollection.updateOne(filter, updateDoc, options);
+            const result = await studentsCollection.updateOne(filter, updateDoc, options);
             res.send(result)
         })
         // Send a ping to confirm a successful connection
