@@ -36,9 +36,8 @@ async function run() {
 
         app.get('/students/:email', async (req, res) => {
             const email = req.params.email
-            console.log(email)
             const query = { email: email }
-            const result = await studentsCollection.findOne(query)
+            const result = await studentsCollection.find(query).toArray()
             res.send(result)
         })
 
@@ -52,6 +51,13 @@ async function run() {
                 $set: student,
             }
             const result = await studentsCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
+        app.delete('/students/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await studentsCollection.deleteOne(query)
             res.send(result)
         })
         // Send a ping to confirm a successful connection
