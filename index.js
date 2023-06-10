@@ -41,6 +41,12 @@ async function run() {
             res.send(result)
         })
 
+        app.post('/classes', async (req, res) => {
+            const addClass = req.body
+            const result = await classesCollection.insertOne(addClass);
+            res.send(result)
+        })
+
         app.put('/students/:id', async (req, res) => {
             const student = req.body
             console.log(student)
