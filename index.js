@@ -89,8 +89,14 @@ async function run() {
             res.send(result)
         })
         // status
-        app.patch('/students/:id', async (req, res) => {
+        app.patch('/classes/:id', async (req, res) => {
             const status = req.body;
+            const filter = { _id: new ObjectId(req.params.id) }
+            const updateDoc = {
+                $set: status
+            }
+            const result = await studentsCollection.updateOne(filter, updateDoc);
+            res.send(result)
 
         })
         app.delete('/students/:id', async (req, res) => {
