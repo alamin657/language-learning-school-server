@@ -77,6 +77,10 @@ async function run() {
             res.send(result)
         })
         // manage users
+        app.get('/users/abc', async (req, res) => {
+            const result = await usersCollection.find().toArray()
+            res.send(result)
+        })
         app.post('/users', async (req, res) => {
             const manageUsers = req.body;
             const result = await usersCollection.insertOne(manageUsers);
