@@ -80,8 +80,6 @@ async function run() {
 
         app.put('/students/:id', async (req, res) => {
             const student = req.body
-            console.log(student)
-
             const filter = { _id: new ObjectId(req.params.id) }
             const options = { upsert: true }
             const updateDoc = {
@@ -90,7 +88,11 @@ async function run() {
             const result = await studentsCollection.updateOne(filter, updateDoc, options);
             res.send(result)
         })
+        // status
+        app.patch('/students/:id', async (req, res) => {
+            const status = req.body;
 
+        })
         app.delete('/students/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
