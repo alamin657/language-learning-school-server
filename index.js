@@ -49,7 +49,7 @@ async function run() {
 
         const classesCollection = client.db('learninDB').collection('classes');
         const studentsCollection = client.db('learninDB').collection('students');
-
+        const usersCollection = client.db('learninDB').collection('users');
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -76,7 +76,12 @@ async function run() {
             const result = await classesCollection.insertOne(addClass);
             res.send(result)
         })
-
+        // manage users
+        app.post('/users', async (req, res) => {
+            const manageUsers = req.body;
+            const result = await usersCollection.insertOne(manageUsers);
+            res.send(result)
+        })
 
         app.put('/students/:id', async (req, res) => {
             const student = req.body
