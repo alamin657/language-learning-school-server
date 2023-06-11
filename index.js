@@ -58,24 +58,51 @@ async function run() {
             res.send({ token })
         })
 
-
+        // classes section
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result)
         })
+        app.post('/classes', async (req, res) => {
+            const addClass = req.body
+            const result = await classesCollection.insertOne(addClass);
+            res.send(result)
+        })
+        app.patch('/classes/:id', async (req, res) => {
+            const status = req.body;
+            const filter = { _id: new ObjectId(req.params.id) }
+            const updateDoc = {
+                $set: status
+            }
+            const result = await studentsCollection.updateOne(filter, updateDoc);
+            res.send(result)
 
+        })
+        // student section
         app.get('/students/:email', async (req, res) => {
             const email = req.params.email
             const query = { email: email }
             const result = await studentsCollection.find(query).toArray()
             res.send(result)
         })
-
-        app.post('/classes', async (req, res) => {
-            const addClass = req.body
-            const result = await classesCollection.insertOne(addClass);
+        app.put('/students/:id', async (req, res) => {
+            const student = req.body
+            const filter = { _id: new ObjectId(req.params.id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: student,
+            }
+            const result = await studentsCollection.updateOne(filter, updateDoc, options);
             res.send(result)
         })
+
+        app.delete('/students/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await studentsCollection.deleteOne(query)
+            res.send(result)
+        })
+
         // manage users
         app.get('/users/abc', async (req, res) => {
             const result = await usersCollection.find().toArray()
@@ -87,31 +114,11 @@ async function run() {
             res.send(result)
         })
 
-        app.put('/students/:id', async (req, res) => {
-            const student = req.body
-            const filter = { _id: new ObjectId(req.params.id) }
-            const options = { upsert: true }
-            const updateDoc = {
-                $set: student,
-            }
-            const result = await studentsCollection.updateOne(filter, updateDoc, options);
-            res.send(result)
-        })
-        // status
-        app.patch('/classes/:id', async (req, res) => {
-            const status = req.body;
-            const filter = { _id: new ObjectId(req.params.id) }
-            const updateDoc = {
-                $set: status
-            }
-            const result = await studentsCollection.updateOne(filter, updateDoc);
-            res.send(result)
-
-        })
-        app.delete('/students/:id', async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const result = await studentsCollection.deleteOne(query)
+        // role section
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const result = await studentsCollection.find(query).toArray()
             res.send(result)
         })
 
