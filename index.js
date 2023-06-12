@@ -68,6 +68,13 @@ async function run() {
             const result = await classesCollection.insertOne(addClass);
             res.send(result)
         })
+        // The Instructor of my classes
+        app.get('/classes/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await studentsCollection.find(query).toArray()
+            res.send(result)
+        })
         app.patch('/classes/:id', async (req, res) => {
             const status = req.body;
             const filter = { _id: new ObjectId(req.params.id) }
