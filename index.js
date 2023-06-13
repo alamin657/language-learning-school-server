@@ -50,24 +50,22 @@ async function run() {
         const classesCollection = client.db('learninDB').collection('classes');
         const studentsCollection = client.db('learninDB').collection('students');
         const usersCollection = client.db('learninDB').collection('users');
+        const paymentCollection = client.db('learninDB').collection('payments')
+
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' })
 
             res.send({ token })
         })
 
         // classes section
         app.get('/classes', async (req, res) => {
-            const result = await classesCollection.find().toArray();
+            const result = await classesCollection.find().sort({ enrolled: -1 }).toArray();
             res.send(result)
         })
-        app.post('/classes', async (req, res) => {
-            const addClass = req.body
-            const result = await classesCollection.insertOne(addClass);
-            res.send(result)
-        })
+
         // The Instructor of my classes
         app.get('/classes/:email', async (req, res) => {
             const email = req.params.email;
@@ -75,6 +73,24 @@ async function run() {
             const result = await studentsCollection.find(query).toArray()
             res.send(result)
         })
+
+        app.post('/classes', async (req, res) => {
+            const addClass = req.body
+            const result = await classesCollection.insertOne(addClass);
+            res.send(result)
+        })
+
+        // transaction
+        app.post('/classes/payments', async (req, res) => {
+            const payment = req.body;
+
+            // const filter = { _id: new ObjectId(payment.id) };
+
+
+            const result = await paymentCollection.insertOne(payment)
+            res.send(result)
+        })
+
         app.patch('/classes/:id', async (req, res) => {
             const status = req.body;
             const filter = { _id: new ObjectId(req.params.id) }
@@ -90,6 +106,13 @@ async function run() {
             const email = req.params.email
             const query = { email: email }
             const result = await studentsCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/student/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await studentsCollection.findOne(query);
             res.send(result)
         })
         app.put('/students/:id', async (req, res) => {
@@ -128,14 +151,35 @@ async function run() {
             const result = await studentsCollection.find(query).toArray()
             res.send(result)
         })
+        // my enrolled classes
+        app.get('/payments/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await paymentCollection.find(query).toArray();
+            res.send(result)
+        })
 
+        // create payment intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
         // payment related api
-        app.post('/payments', verifyJWT, async (req, res) => {
-            const payment = req.body;
+        app.post('/payments/:id', async (req, res) => {
+            // const payment = req.body;
+            const { id } = req.params
             const insertResult = await paymentCollection.insertOne(payment);
 
-            const query = { _id: { $in: payment.cartItems.map(id => new ObjectId(id)) } }
-            const deleteResult = await cartCollection.deleteMany(query)
+            const query = { _id: { $in: payment(new ObjectId(id)) } }
+            const deleteResult = await paymentCollection.deleteMany(query)
 
             res.send({ insertResult, deleteResult });
         })
